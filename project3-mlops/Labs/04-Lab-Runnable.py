@@ -1,18 +1,16 @@
 # Databricks notebook source
 # TODO
-Create 3 widgets for parameter passing into the notebook:
-  - n_estimators with a default of 100
-  - learning_rate with a default of .1
-  - max_depth with a default of 1 
-Note that only strings can be used for widgets
+
+dbutils.widgets.text("n_estimators", "100")
+dbutils.widgets.text("learning_rate", ".1")
+dbutils.widgets.text("max_depth", "1")
 
 # COMMAND ----------
 
 # TODO
-Read from the widgets to create 3 variables.  Be sure to cast the values to numeric types
-n_estimators = FILL_IN
-learning_rate = FILL_IN
-max_depth = FILL_IN
+n_estimators = int(dbutils.widgets.get("n_estimators").strip())
+learning_rate = float(dbutils.widgets.get("learning_rate").strip())
+max_depth = int(dbutils.widgets.get("max_depth").strip())
 
 # COMMAND ----------
 
