@@ -66,6 +66,12 @@ display(airbnbDF)
 # COMMAND ----------
 
 # TODO
+import pandas as pd
+airbnbDF['price'] = airbnbDF['price'].str[1:]
+airbnbDF['price'] = airbnbDF['price'].str.replace(',', '')
+airbnbDF['price'] = airbnbDF['price'].astype('float')
+
+
 
 # COMMAND ----------
 
@@ -77,6 +83,11 @@ display(airbnbDF)
 # COMMAND ----------
 
 # TODO
+    
+airbnbDF = airbnbDF.drop(['host_is_superhost', 'bed_type', 'zipcode'], axis=1)
+for col in airbnbDF.columns:
+    print(col)
+
 
 # COMMAND ----------
 
@@ -87,6 +98,33 @@ display(airbnbDF)
 # COMMAND ----------
 
 # TODO
+
+#Cancellation policy: moderate = 1 strict = 2
+airbnbDF.dropna(inplace=True)
+
+airbnbDF['cancellation_policy'] = airbnbDF['cancellation_policy'].astype('category')
+airbnbDF['cancellation_policy'] = airbnbDF['cancellation_policy'].cat.codes
+airbnbDF['cancellation_policy'] = airbnbDF['cancellation_policy'].astype('int64')
+
+
+airbnbDF['instant_bookable'] = airbnbDF['instant_bookable'].astype('category')
+airbnbDF['instant_bookable'] = airbnbDF['instant_bookable'].cat.codes
+airbnbDF['instant_bookable'] = airbnbDF['instant_bookable'].astype('int64')
+
+
+airbnbDF['neighbourhood_cleansed'] = airbnbDF['neighbourhood_cleansed'].astype('category')
+airbnbDF['neighbourhood_cleansed'] = airbnbDF['neighbourhood_cleansed'].cat.codes
+airbnbDF['neighbourhood_cleansed'] = airbnbDF['neighbourhood_cleansed'].astype('int64')
+
+
+airbnbDF['property_type'] = airbnbDF['property_type'].astype('category')
+airbnbDF['property_type'] = airbnbDF['property_type'].cat.codes
+airbnbDF['property_type'] = airbnbDF['property_type'].astype('int64')
+
+airbnbDF['room_type'] = airbnbDF['room_type'].astype('category')
+airbnbDF['room_type'] = airbnbDF['room_type'].cat.codes
+airbnbDF['room_type'] = airbnbDF['room_type'].astype('int64')
+
 
 # COMMAND ----------
 
@@ -99,6 +137,10 @@ display(airbnbDF)
 
 # TODO
 from sklearn.model_selection import train_test_split
+for type in airbnbDF.dtypes:
+    print(type)
+print(len(airbnbDF.dtypes))
+X_train, X_test, y_train, y_test = train_test_split(airbnbDF.drop(["price"], axis=1), airbnbDF[["price"]].values.ravel(), random_state=42)
 
 
 # COMMAND ----------
@@ -119,6 +161,10 @@ from sklearn.model_selection import train_test_split
 # COMMAND ----------
 
 # TODO
+from sklearn.ensemble import RandomForestRegressor
+rf = RandomForestRegressor(n_estimators=100, max_depth=10, max_features=21)
+rf.fit(X_train, y_train)
+predictions = rf.predict(X_test)
 
 # COMMAND ----------
 
@@ -128,6 +174,8 @@ from sklearn.model_selection import train_test_split
 # COMMAND ----------
 
 # TODO
+from sklearn.metrics import mean_squared_error
+mean_squared_error(y_test, predictions)
 
 # COMMAND ----------
 
@@ -139,6 +187,7 @@ from sklearn.model_selection import train_test_split
 
 # TODO
 import mlflow.sklearn
+mlflow.log_metric("mse", mean_squared_error(y_test, predictions))
 
 
 # COMMAND ----------
@@ -182,7 +231,7 @@ class Airbnb_Model(mlflow.pyfunc.PythonModel):
         self.model = model
     
     def predict(self, context, model_input):
-        # FILL_IN
+        return model_input.apply(lambda column: column/self.beds)
 
 
 # COMMAND ----------

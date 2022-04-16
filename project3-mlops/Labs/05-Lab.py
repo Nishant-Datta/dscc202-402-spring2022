@@ -246,7 +246,7 @@ class RF_with_postprocess(mlflow.pyfunc.PythonModel):
         '''return post-processed results
         Expensive: predicted price > 100
         Not Expensive: predicted price <= 100'''
-        return model_input.apply(lambda column: "Expensive" if column > 100 else "Not Expensive")
+        return model_input.apply(lambda results: "Expensive" if results > 100 else "Not Expensive")
     
     def predict(self, context, model_input):
         processed_model_input = self.preprocess_input(model_input.copy())
