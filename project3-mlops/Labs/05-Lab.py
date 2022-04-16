@@ -94,17 +94,17 @@ rf2 = RandomForestRegressor(n_estimators=100, max_depth=25)
 
 # pre-process train data
 X_train_processed = X_train.copy()
-X_train_processed["trunc_lat"] = #FILL_IN
-X_train_processed["trunc_long"] = #FILL_IN
-X_train_processed["review_scores_sum"] = #FILL_IN
-X_train_processed = X_train_processed.drop(FILL_IN, axis=1)
+X_train_processed["trunc_lat"] = X_train_processed['latitude'].round(decimals = 0)
+X_train_processed["trunc_long"] = X_train_processed['longitude'].round(decimals = 0)
+X_train_processed["review_scores_sum"] = X_train_processed['review_scores_accuracy']+X_train_processed['review_scores_cleanliness']+X_train_processed['review_scores_checkin']+X_train_processed['review_scores_communication']+X_train_processed['review_scores_location']+X_train_processed['review_scores_value']
+X_train_processed = X_train_processed.drop(['latitude', 'longitude', 'review_scores_cleanliness', 'review_scores_checkin', 'review_scores_communication', 'review_scores_location', 'review_scores_value'], axis=1)
 
 # pre-process test data to obtain MSE
 X_test_processed = X_test.copy()
-X_test_processed["trunc_lat"] = #FILL_IN
-X_test_processed["trunc_long"] = #FILL_IN
-X_test_processed["review_scores_sum"] = #FILL_IN
-X_test_processed = X_test_processed.drop(FILL_IN, axis=1)
+X_test_processed["trunc_lat"] = X_test_processed['latitude'].round(decimals = 0)
+X_test_processed["trunc_long"] = X_test_processed['longitude'].round(decimals = 0)
+X_test_processed["review_scores_sum"] = X_test_processed['review_scores_accuracy']+X_test_processed['review_scores_cleanliness']+X_test_processed['review_scores_checkin']+X_test_processed['review_scores_communication']+X_test_processed['review_scores_location']+X_test_processed['review_scores_value']
+X_test_processed = X_test_processed.drop(['latitude', 'longitude', 'review_scores_cleanliness', 'review_scores_checkin', 'review_scores_communication', 'review_scores_location', 'review_scores_value'], axis=1)
 
 
 # fit and evaluate new rf model
@@ -112,6 +112,7 @@ rf2.fit(X_train_processed, y_train)
 rf2_mse = mean_squared_error(y_test, rf2.predict(X_test_processed))
 
 rf2_mse
+
 
 # COMMAND ----------
 
@@ -186,8 +187,7 @@ class RF_with_preprocess(mlflow.pyfunc.PythonModel):
 
     def preprocess_input(self, model_input):
         '''return pre-processed model_input'''
-        # FILL_IN
-        return
+        return self.preprocess_input(model_input.copy())
     
     def predict(self, context, model_input):
         processed_model_input = self.preprocess_input(model_input.copy())
@@ -240,15 +240,13 @@ class RF_with_postprocess(mlflow.pyfunc.PythonModel):
 
     def preprocess_input(self, model_input):
         '''return pre-processed model_input'''
-        # FILL_IN
-        return 
+        return self.preprocess_input(model_input.copy()) 
       
     def postprocess_result(self, results):
         '''return post-processed results
         Expensive: predicted price > 100
         Not Expensive: predicted price <= 100'''
-        # FILL_IN
-        return 
+        return model_input.apply(lambda column: "Expensive" if column > 100 else "Not Expensive")
     
     def predict(self, context, model_input):
         processed_model_input = self.preprocess_input(model_input.copy())
